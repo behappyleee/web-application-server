@@ -1,10 +1,14 @@
 package webserver;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.file.Files;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +29,39 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = "Hello World".getBytes();
+//            byte[] body = "Hello World".getBytes();
+//            response200Header(dos, body.length);
+//            responseBody(dos, body);
+            
+            // HTTP 요청을 읽을 수 있게 InputStream 을 BufferedReader 로 바꾸기 2021-06-28
+            
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            
+            String line = br.readLine();
+            String [] tokens = line.split(" ");
+            
+            for(int i=0; i<tokens.length; i++) {
+            	System.out.println("token : " + tokens[i]);
+            }
+            
+            String url = tokens[1];
+            byte [] body = Files.readAllBytes(new File("./webapp" + url).toPath() );
             response200Header(dos, body.length);
-            responseBody(dos, body);
+            responseBody(dos, body);			
+            		
+            // line while문 돌려 HTTP 마지막 Header 확인 2021-06-28
+//            while( !"".equals(line) ) {
+//            	
+//            	System.out.println("BufferReader 주소 : " + line);
+//            	
+//            	 // 무한 루프를 방지하기 위하여 반복문을 빠져나오게 해준다 2021-06-28	
+//            	if( line == null )  {
+//            		return;
+//            	}
+//            	
+//            }
+ 
+            
         } catch (IOException e) {
             log.error(e.getMessage());
         }
