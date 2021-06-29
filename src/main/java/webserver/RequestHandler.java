@@ -1,6 +1,7 @@
 package webserver;
 
 import java.io.BufferedReader;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -9,9 +10,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import db.DataBase;
+import model.User;
+import util.HttpRequestUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -29,9 +35,7 @@ public class RequestHandler extends Thread {
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
             DataOutputStream dos = new DataOutputStream(out);
-
-            // HTTP 요청을 읽을 수 있게 InputStream 을 BufferedReader 로 바꾸기 2021-06-28
-            // 주소가 없을시 접속이 안됨 해결  할 것 !!
+            
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
             
             String line = br.readLine();
@@ -42,8 +46,8 @@ public class RequestHandler extends Thread {
             }
             
             String url = tokens[1];
-            
             byte[] body;
+            
             // 뒤 주소가 없을 시 Default로 Hello World 출력하게 만듦
             if( url.equals("/")) {
             	body = "Hello World".getBytes();
@@ -52,20 +56,52 @@ public class RequestHandler extends Thread {
             
             // 뒤 주소가 있을 시 해당 url로 이동하게 만들어 줌 
             } else {
-            	body = Files.readAllBytes(new File("./webapp" + url).toPath() );
+            	 // 쿼리스트링이 있을 시 
+            	 if(url.contains("?")) {	
+            		 
+            		 int index = url.indexOf("?");
+            		 
+            		 String requestPath = url.substring(0, index);
+            		 String params = url.substring(index+1);
+            		 
+            		 System.out.println("User 클래스에 담기 " + requestPath + "parmas : " + params);
+            		 
+            		 Map <String, String> paramCheck = HttpRequestUtils.parseQueryString(params);
+            		 
+            		 System.out.println("값 parsing Check 하기" + paramCheck);
+            		 
+            		 for(String keys : paramCheck.keySet()) {
+            			 System.out.println("값 Key Check : " + keys + " 값 Value Check " + paramCheck.get(keys) );
+            		 }
+            		 
+            		 User user = new User(paramCheck.get("userId") , paramCheck.get("password") , paramCheck.get("name"), paramCheck.get("email"));
+            		 System.out.println("User Class 에 잘 담겼는지 Check : " + user);
+            		 
+            		 DataBase.addUser(user);
+            		 
+            		 System.out.println("DB 들어간 값 확인 " + DataBase.findUserById(paramCheck.get("userId")) );
+            		 
+            		 // 회원가입 성공 시 index.html 실패 시 /user/login_failed.html 로 이동
+            		 if( DataBase.findUserById(paramCheck.get("userId")) != null ) {
+            			 url = "/index.html";
+            		 } else {
+            			 url = "/user/login_failed.html";
+            		 }
+            		 
+            	   // 쿼리스트링 없고 url 주소만 있을 시 
+            	 } else {
+            		 
+            		 
+            	 }
+            	 
+            	 // 성공시 index.html 로 가지만 회원가입 후 로그인 누를 시 오류 발생 이것 해결하기 
+            	 body = Files.readAllBytes(new File("./webapp" + url).toPath());
             	 response200Header(dos, body.length);
-                 responseBody(dos, body);			
+                 responseBody(dos, body);	
             }
             
-            
-            
-            
-            
-            
-            
-            
             // line while문 돌려 HTTP 마지막 Header 확인 2021-06-28
-//            while( !"".equals(line) ) {
+//            while( !"".equals(line) ) {	
 //            	
 //            	System.out.println("BufferReader 주소 : " + line);
 //            	
@@ -75,8 +111,6 @@ public class RequestHandler extends Thread {
 //            	}
 //            	
 //            }
-            
-            
         } catch (IOException e) {
             log.error(e.getMessage());
         }
@@ -92,7 +126,7 @@ public class RequestHandler extends Thread {
             log.error(e.getMessage());
         }
     }
-
+    
     private void responseBody(DataOutputStream dos, byte[] body) {
         try {
             dos.write(body, 0, body.length);
