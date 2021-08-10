@@ -37,14 +37,20 @@ public class RequestHandler extends Thread {
             DataOutputStream dos = new DataOutputStream(out);
             
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            
+            System.out.println("in 확인 : " + in);
             String line = br.readLine();
+            System.out.println("line " + line);
             String [] tokens = line.split(" ");
             
-            for(int i=0; i<tokens.length; i++) {
-            	System.out.println("token : " + tokens[i] +" 번호 확인 : " + i);
-            }
+            System.out.println("line : " + line);
             
+            // 마지막 header 값 처리 해주어야 함 !!
+//        	while( line != null ) {
+//        		System.out.println(tokens);
+//        			if(line == "") {
+//        				return ;
+//        			}
+//        	}
             String url = tokens[1];
             byte[] body;
             
