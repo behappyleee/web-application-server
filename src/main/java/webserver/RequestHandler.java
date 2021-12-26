@@ -62,7 +62,7 @@ public class RequestHandler extends Thread {
             
             // 뒤 주소가 없을 시 Default로 Hello World 출력하게 만듦
             if( url.equals("/")) {
-            	body = "Hello Linux World".getBytes();
+            	body = "Hello Linux Test Git World".getBytes();
             	response200Header(dos, body.length);
             	responseBody(dos, body);
             
