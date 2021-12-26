@@ -70,7 +70,7 @@ public class RequestHandler extends Thread {
             } else {
             	 // 쿼리스트링이 있을 시 
             	 if(url.contains("?")) {	
-            		 // 쿼리 스트링이 있을 시 잘라버림 
+            		 // 쿼리 스트링이 있을 시 잘라버림 	
             		 int index = url.indexOf("?");
             		 
             		 String requestPath = url.substring(0, index);
