@@ -15,12 +15,12 @@
 * 각 요구사항을 구현하는 것이 중요한 것이 아니라 구현 과정을 통해 학습한 내용을 인식하는 것이 배움에 중요하다. 
 
 ## Linux Apllication Run 방법
-(1) Linux Ubuntu 접속
-(2) /home/lee/web-application-server 로 Directory 이동
-(3) java -cp target/classes:target/dependency/* webserver.WebServer $포트번호 & 로 java application 실행
+(1) Linux Ubuntu 접속 <br>
+(2) /home/lee/web-application-server 로 Directory 이동 <br>
+(3) java -cp target/classes:target/dependency/* webserver.WebServer $포트번호 & 로 java application 실행 <br>
  	port 번호는 1024 보다 큰 숫자 자신이 원하는 숫자로 지정
-(4) Application 종료방법은 ps -ef | grep webserver 명령어 입력
-(5) webserver 가 작동중인 PID 확인 후 kill -9 $POD 로 웹 서버를 종료
+(4) Application 종료방법은 ps -ef | grep webserver 명령어 입력 <br>
+(5) webserver 가 작동중인 PID 확인 후 kill -9 $POD 로 웹 서버를 종료	<br>
 
 ### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
 * index.html 로 가게는 설정해 놓음 하지만 교재대로 제대로 설정되지는 않은 것 같음 교재 참고 후 만들어 보기
