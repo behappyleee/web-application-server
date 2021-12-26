@@ -103,6 +103,7 @@ public class RequestHandler extends Thread {
 //            	 } 
             	
             	 System.out.println("마지막 url 확인 : " + url );
+            	 System.out.println("Test 성공하기를 ... ");
             	 // 성공시 index.html 로 가지만 회원가입 후 로그인 누를 시 오류 발생 이것 해결하기 
             	 body = Files.readAllBytes(new File("./webapp" + url).toPath());
             	 System.out.println("마지막 Body 확인 : " + body);
