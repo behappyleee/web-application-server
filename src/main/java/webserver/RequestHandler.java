@@ -26,32 +26,38 @@ public class RequestHandler extends Thread {
 
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
+        
     }
 
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
-                connection.getPort());
+        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
-        try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
+        try {
+        	// inputstream - 데이터 입력 시, outputstream - 데이터 출력 시 	
+        	// Stream 은 단방향 통신, 하나의 Stream 으로 입출력을 동시에 할 수 없음 
+        	InputStream in = connection.getInputStream(); 
+        	OutputStream out = connection.getOutputStream(); 
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+        	
             DataOutputStream dos = new DataOutputStream(out);
             
             BufferedReader br = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-            System.out.println("in 확인 : " + in);
+            
             String line = br.readLine();
+            
+            // line 의 맨 마지막을 가져와야 함 
             System.out.println("line " + line);
             String [] tokens = line.split(" ");
-            
-            System.out.println("line : " + line);
-            
-            // 마지막 header 값 처리 해주어야 함 !!
-//        	while( line != null ) {
-//        		System.out.println(tokens);
-//        			if(line == "") {
-//        				return ;
-//        			}
-//        	}
             String url = tokens[1];
+            
+//            while(line != null) {
+//            	System.out.println("BR READLINE Check : " + br.readLine());
+//            	
+//            	String[] tokens = br.readLine().split(" ");
+//            	
+//            	
+//            }
+
             byte[] body;
             
             // 뒤 주소가 없을 시 Default로 Hello World 출력하게 만듦
@@ -64,7 +70,7 @@ public class RequestHandler extends Thread {
             } else {
             	 // 쿼리스트링이 있을 시 
             	 if(url.contains("?")) {	
-            		 
+            		 // 쿼리 스트링이 있을 시 잘라버림 
             		 int index = url.indexOf("?");
             		 
             		 String requestPath = url.substring(0, index);
@@ -93,12 +99,7 @@ public class RequestHandler extends Thread {
             		 } else {
             			 url = "/user/login_failed.html";
             		 }
-            		 
-            	   // 쿼리스트링 없고 url 주소만 있을 시 
-            	 } else {
-            		 
-            		 
-            	 }
+            	 } 
             	 
             	 // 성공시 index.html 로 가지만 회원가입 후 로그인 누를 시 오류 발생 이것 해결하기 
             	 body = Files.readAllBytes(new File("./webapp" + url).toPath());
@@ -111,7 +112,7 @@ public class RequestHandler extends Thread {
 //            	
 //            	System.out.println("BufferReader 주소 : " + line);
 //            	
-//            	 // 무한 루프를 방지하기 위하여 반복문을 빠져나오게 해준다 2021-06-28	
+//            	// 무한 루프를 방지하기 위하여 반복문을 빠져나오게 해준다 2021-06-28	
 //            	if( line == null )  {
 //            		return;
 //            	}
