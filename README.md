@@ -18,7 +18,7 @@
 (1) Linux Ubuntu 접속 <br>
 (2) /home/lee/web-application-server 로 Directory 이동 <br>
 (3) java -cp target/classes:target/dependency/* webserver.WebServer $포트번호 & 로 java application 실행 <br>
- 	port 번호는 1024 보다 큰 숫자 자신이 원하는 숫자로 지정
+ 	port 번호는 1024 보다 큰 숫자 자신이 원하는 숫자로 지정 <br>
 (4) Application 종료방법은 ps -ef | grep webserver 명령어 입력 <br>
 (5) webserver 가 작동중인 PID 확인 후 kill -9 $POD 로 웹 서버를 종료	<br>
 
