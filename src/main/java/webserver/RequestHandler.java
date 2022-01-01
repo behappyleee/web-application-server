@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import db.DataBase;
 import model.User;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -28,8 +29,8 @@ public class RequestHandler extends Thread {
         this.connection = connectionSocket;
         
     }
-
-    public void run() {
+    
+	public void run() {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
         
         try(InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
@@ -39,62 +40,56 @@ public class RequestHandler extends Thread {
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
         	InputStreamReader reader = new InputStreamReader(in);
             BufferedReader br = new BufferedReader(reader);
-            
+           
             String line = br.readLine();
             
             // line 의 맨 마지막을 가져와야 함 
             System.out.println("line " + line);
             
-            String [] tokens = line.split(" ");
-            // 첫번째 Token 에서 url 을 얻는다 
-            String url = tokens[1];
+        	String [] tokens = line != null ? line.split(" ") : null;
+        	// 첫번째 Token 에서 url 을 얻는다
+        	String url = tokens[1];
+        	System.out.println("URL 체크하기 : " + url);
             
             // TODO While 문 주는 이유 고민하여 보기 !
             // HTTP 요청 전체를 출력 --> 자꾸 무한루프에 빠짐 이유 생각하여보기 ...
+        	
 //            while(!"".equals(line)) {
+//            	line = br.readLine();
 //            	System.out.println("BR READLINE Check : " + br.readLine());
 //            	System.out.println("URL CHECK !!! :: " + url);
 //            	if(line == null) {
-//            		return;
+//            		break;
 //            	}
 //            }	
-
-            byte[] body;
-            DataOutputStream dos = new DataOutputStream(out);
             
-            // 뒤 주소가 없을 시 Default로 Hello World 출력하게 만듦
+        	byte[] body;
+            DataOutputStream dos = new DataOutputStream(out);
+            // 뒤 주소가 없을 시 Default로 Hello World 출력하게 만듦s
             if( url.equals("/")) {
             	body = "Hello Linux Test Git World".getBytes();
             	response200Header(dos, body.length);
             	responseBody(dos, body);
-            
+            	
             // 뒤 주소가 있을 시 해당 url로 이동하게 만들어 줌 
             } else {
-            	 // 쿼리스트링이 있을 시 
             	
+            	// 쿼리스트링이 있을 시 
             	// get / post 방식으로 회원가입.. .
             	 if(url.contains("?")) {	
             		 // 쿼리 스트링이 있을 시 잘라버림 	
             		 int index = url.indexOf("?");
-            		 
             		 String requestPath = url.substring(0, index);
             		 String params = url.substring(index+1);
             		 
             		 Map <String, String> paramCheck = HttpRequestUtils.parseQueryString(params);
-            		 
-            		 System.out.println("값 parsing Check 하기" + paramCheck);
-            		 
+            		 	
             		 for(String keys : paramCheck.keySet()) {
             			 System.out.println("값 Key Check : " + keys + " 값 Value Check " + paramCheck.get(keys) );
             		 }
             		 
             		 User user = new User(paramCheck.get("userId") , paramCheck.get("password") , paramCheck.get("name"), paramCheck.get("email"));
-            		 
-            		 System.out.println("User Class 에 잘 담겼는지 Check : " + user);
-            		 	
             		 DataBase.addUser(user);
-            		 
-            		 System.out.println("DB 들어간 값 확인 " + DataBase.findUserById(paramCheck.get("userId")) );
             		 
             		 // 회원가입 성공 시 index.html 실패 시 /user/login_failed.html 로 이동
             		 if(DataBase.findUserById(paramCheck.get("userId")) != null ) {
@@ -102,7 +97,39 @@ public class RequestHandler extends Thread {
             		 } else {
             			 url = "/user/login_failed.html";
             		 }
-            	 } else if( url.equals("/user/create")) {
+            	 } else if( url.equals("/user/create")) { 
+               
+            		 IOUtils a = new IOUtils();
+            		 
+            		// 뒤 br 뒤에 숫자를 고정적이 아닌 Data 추출 Length 만큼 주기
+            		// br 에 Content-Length 를 길이 를 주고, 데이터를 다 읽지 않고 마지막 데이터만 읽기 (Post 데이터가 담겨져 있음)
+            		 String lineData = a.readData(br, 1000);
+            		 
+            		 System.out.println("While 문 Line Data Check : " + lineData);
+            		 
+            		 
+            		 // 뒤 br 뒤에 숫자를 고정적이 아닌 Data 추출 Length 만큼 주기
+//            		 while(true) {
+//            			 lineData = a.readData(br, 200);
+//            			 System.out.println("Line Data 확인 : " + lineData );
+//            			 if(lineData == null) { 
+//            				 System.out.println("Line Data Is Null !");
+//            				 break;
+//            			 }
+//            		 }
+            		 
+	            	while(!"".equals(line)) {
+	            		
+	                 	System.out.println("User Register Form Post 요청 ");
+	            		
+	                 	line = br.readLine();
+	            		System.out.println("BR READLINE Check : " + br.readLine());
+	                 	System.out.println("URL CHECK !!! :: " + url);
+	                 	if(line == null) {
+	                 		return;
+	                 	}
+	                 }	
+            		 
             		 System.out.println("Hello Create Post !");
             	 }
             	
@@ -118,7 +145,7 @@ public class RequestHandler extends Thread {
             log.error(e.getMessage());
         }
     }
-
+    
     private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
