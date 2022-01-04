@@ -107,10 +107,17 @@ public class RequestHandler extends Thread {
             		 
             		 System.out.println("While 문 Line Data Check : " + lineData);
             		 
+            		 String[] testSplit = lineData.split(" ");
+            		 
+            		 
+            		 for(int i=0; i<testSplit.length; i++) {
+            			 System.out.println("각 데이터 : " + testSplit[i] );
+            		 }
+            		 
+            		 
             		 
             		 // 뒤 br 뒤에 숫자를 고정적이 아닌 Data 추출 Length 만큼 주기
 //            		 while(true) {
-//            			 lineData = a.readData(br, 200);
 //            			 System.out.println("Line Data 확인 : " + lineData );
 //            			 if(lineData == null) { 
 //            				 System.out.println("Line Data Is Null !");
@@ -118,17 +125,17 @@ public class RequestHandler extends Thread {
 //            			 }
 //            		 }
             		 
-	            	while(!"".equals(line)) {
-	            		
-	                 	System.out.println("User Register Form Post 요청 ");
-	            		
-	                 	line = br.readLine();
-	            		System.out.println("BR READLINE Check : " + br.readLine());
-	                 	System.out.println("URL CHECK !!! :: " + url);
-	                 	if(line == null) {
-	                 		return;
-	                 	}
-	                 }	
+//	            	while(!"".equals(line)) {
+//	            		
+//	                 	System.out.println("User Register Form Post 요청 ");
+//	            		
+//	                 	line = br.readLine();
+//	            		System.out.println("BR READLINE Check : " + br.readLine());
+//	                 	System.out.println("URL CHECK !!! :: " + url);
+//	                 	if(line == null) {
+//	                 		return;
+//	                 	}
+//	                 }	
             		 
             		 System.out.println("Hello Create Post !");
             	 }
