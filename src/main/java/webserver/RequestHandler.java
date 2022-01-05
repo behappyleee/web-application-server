@@ -103,16 +103,16 @@ public class RequestHandler extends Thread {
             		 
             		// 뒤 br 뒤에 숫자를 고정적이 아닌 Data 추출 Length 만큼 주기
             		// br 에 Content-Length 를 길이 를 주고, 데이터를 다 읽지 않고 마지막 데이터만 읽기 (Post 데이터가 담겨져 있음)
-            		 String lineData = a.readData(br, 1000);
+//            		 String lineData = a.readData(br, 1000);
             		 
-            		 System.out.println("While 문 Line Data Check : " + lineData);
+            		 // System.out.println("While 문 Line Data Check : " + lineData);
             		 
-            		 String[] testSplit = lineData.split(" ");
+            		 // String[] testSplit = lineData.split(" ");
             		 
             		 
-            		 for(int i=0; i<testSplit.length; i++) {
-            			 System.out.println("각 데이터 : " + testSplit[i] );
-            		 }
+            		 //for(int i=0; i<testSplit.length; i++) {
+            			// System.out.println("각 데이터 : " + testSplit[i] );
+            		//}
             		 
             		 
             		 
