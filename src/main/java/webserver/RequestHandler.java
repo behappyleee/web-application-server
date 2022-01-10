@@ -34,12 +34,17 @@ public class RequestHandler extends Thread {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
         
         try(InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-        	// inputstream - 데이터 입력 시, outputstream - 데이터 출력 시 	
+        	// inputstream - 글자를 1byte 씩 밖에 못 읽음, 데이터 입력 시, outputstream - 데이터 출력 시 	
         	// Stream 은 단방향 통신, 하나의 Stream 으로 입출력을 동시에 할 수 없음 
         	
             // TODO 사용자 요청에 대한 처리는 이 곳에 구현하면 된다.
+        	// InputStream Reader 는 원래 1 Byte 씩 InputStream 은 읽어 들이지만 
+        	// InputStreamReader 는 문자 단위로 읽어 준다 (InputStreamReader 은 InputStream 객체를 항상 가지고 있어야 한다.)
         	InputStreamReader reader = new InputStreamReader(in);
-            BufferedReader br = new BufferedReader(reader);
+        	BufferedReader br = new BufferedReader(reader);
+        	// InputStreamReader 덕분에 글자를 통쨰로 읽을 수 있지만
+        	// 배열 크기를 일일이 지정해 주어야 해서 Bufferd Reader 는 Line 단위로 글을 읽음 
+        	// BufferedReader 를 이용하여 	InputStreamReader 입력값을 객체로 사용
            
             String line = br.readLine();
             
@@ -53,7 +58,6 @@ public class RequestHandler extends Thread {
             
             // TODO While 문 주는 이유 고민하여 보기 !
             // HTTP 요청 전체를 출력 --> 자꾸 무한루프에 빠짐 이유 생각하여보기 ...
-        	
 //            while(!"".equals(line)) {
 //            	line = br.readLine();
 //            	System.out.println("BR READLINE Check : " + br.readLine());
@@ -64,6 +68,7 @@ public class RequestHandler extends Thread {
 //            }	
             
         	byte[] body;
+        	
             DataOutputStream dos = new DataOutputStream(out);
             // 뒤 주소가 없을 시 Default로 Hello World 출력하게 만듦s
             if( url.equals("/")) {
@@ -85,7 +90,7 @@ public class RequestHandler extends Thread {
             		 Map <String, String> paramCheck = HttpRequestUtils.parseQueryString(params);
             		 	
             		 for(String keys : paramCheck.keySet()) {
-            			 System.out.println("값 Key Check : " + keys + " 값 Value Check " + paramCheck.get(keys) );
+            			 System.out.println("값 Key Check : " + keys + " 값 Value Check " + paramCheck.get(keys));
             		 }
             		 
             		 User user = new User(paramCheck.get("userId") , paramCheck.get("password") , paramCheck.get("name"), paramCheck.get("email"));
@@ -97,9 +102,13 @@ public class RequestHandler extends Thread {
             		 } else {
             			 url = "/user/login_failed.html";
             		 }
-            	 } else if( url.equals("/user/create")) { 
-               
-            		 IOUtils a = new IOUtils();
+            	 } else if( url.equals("/user/create")) {
+            		 
+            		 
+            		 
+            		 String postBody = IOUtils.readData(br, 59);
+            		 
+            		 
             		 
             		// 뒤 br 뒤에 숫자를 고정적이 아닌 Data 추출 Length 만큼 주기
             		// br 에 Content-Length 를 길이 를 주고, 데이터를 다 읽지 않고 마지막 데이터만 읽기 (Post 데이터가 담겨져 있음)
@@ -113,8 +122,6 @@ public class RequestHandler extends Thread {
             		 //for(int i=0; i<testSplit.length; i++) {
             			// System.out.println("각 데이터 : " + testSplit[i] );
             		//}
-            		 
-            		 
             		 
             		 // 뒤 br 뒤에 숫자를 고정적이 아닌 Data 추출 Length 만큼 주기
 //            		 while(true) {
