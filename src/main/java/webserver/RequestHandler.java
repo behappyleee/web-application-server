@@ -105,10 +105,7 @@ public class RequestHandler extends Thread {
             	 } else if( url.equals("/user/create")) {
             		 
             		 
-            		 
             		 String postBody = IOUtils.readData(br, 59);
-            		 
-            		 
             		 
             		// 뒤 br 뒤에 숫자를 고정적이 아닌 Data 추출 Length 만큼 주기
             		// br 에 Content-Length 를 길이 를 주고, 데이터를 다 읽지 않고 마지막 데이터만 읽기 (Post 데이터가 담겨져 있음)
