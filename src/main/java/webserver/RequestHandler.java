@@ -1,19 +1,24 @@
 package webserver;
 
 import java.io.BufferedReader;
-
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.net.HttpHeaders;
 
 import db.DataBase;
 import model.User;
@@ -62,51 +67,48 @@ public class RequestHandler extends Thread {
 //            	line = br.readLine();
 //            	System.out.println("BR READLINE Check : " + br.readLine());
 //            	System.out.println("URL CHECK !!! :: " + url);
-//            	if(line == null) {
-//            		break;
+//            	if(line.equals(null)) {
+//            		return;
 //            	}
 //            }	
             
         	byte[] body;
-        	
             DataOutputStream dos = new DataOutputStream(out);
+            
             // 뒤 주소가 없을 시 Default로 Hello World 출력하게 만듦s
             if( url.equals("/")) {
             	body = "Hello Linux Test Git World".getBytes();
             	response200Header(dos, body.length);
             	responseBody(dos, body);
+            }
+            
+            if (url.contains("?"))  {
+        		 // 쿼리 스트링이 있을 시 잘라버림 	
+        		 int index = url.indexOf("?");
+        		 String requestPath = url.substring(0, index);
+        		 String params = url.substring(index+1);
+        		 Map <String, String> paramCheck = HttpRequestUtils.parseQueryString(params);
+        		 	
+        		 for(String keys : paramCheck.keySet()) {
+        			 System.out.println("값 Key Check : " + keys + " 값 Value Check " + paramCheck.get(keys));
+        		 }
+        		 
+        		 User user = new User(paramCheck.get("userId") , paramCheck.get("password") , paramCheck.get("name"), paramCheck.get("email"));
+        		 DataBase.addUser(user);
+        		 
+        		 // 회원가입 성공 시 index.html 실패 시 /user/login_failed.html 로 이동
+        		 if(DataBase.findUserById(paramCheck.get("userId")) != null ) {
+        			 url = "/index.html";
+        		 } else {
+        			 url = "/user/login_failed.html";
+        		 }
+            } else if(url.equals("/user/create")) {
             	
-            // 뒤 주소가 있을 시 해당 url로 이동하게 만들어 줌 
-            } else {
+            	System.out.println("parse : " + HttpRequestUtils.parseHeader(url));
+            				
+            	String postBody = IOUtils.readData(br, 1000);
             	
-            	// 쿼리스트링이 있을 시 
-            	// get / post 방식으로 회원가입.. .
-            	 if(url.contains("?")) {	
-            		 // 쿼리 스트링이 있을 시 잘라버림 	
-            		 int index = url.indexOf("?");
-            		 String requestPath = url.substring(0, index);
-            		 String params = url.substring(index+1);
-            		 
-            		 Map <String, String> paramCheck = HttpRequestUtils.parseQueryString(params);
-            		 	
-            		 for(String keys : paramCheck.keySet()) {
-            			 System.out.println("값 Key Check : " + keys + " 값 Value Check " + paramCheck.get(keys));
-            		 }
-            		 
-            		 User user = new User(paramCheck.get("userId") , paramCheck.get("password") , paramCheck.get("name"), paramCheck.get("email"));
-            		 DataBase.addUser(user);
-            		 
-            		 // 회원가입 성공 시 index.html 실패 시 /user/login_failed.html 로 이동
-            		 if(DataBase.findUserById(paramCheck.get("userId")) != null ) {
-            			 url = "/index.html";
-            		 } else {
-            			 url = "/user/login_failed.html";
-            		 }
-            	 } else if( url.equals("/user/create")) {
-            		 
-            		 
-            		 String postBody = IOUtils.readData(br, 59);
-            		 
+            	System.out.println("결과 값 확인 : " + postBody);
             		// 뒤 br 뒤에 숫자를 고정적이 아닌 Data 추출 Length 만큼 주기
             		// br 에 Content-Length 를 길이 를 주고, 데이터를 다 읽지 않고 마지막 데이터만 읽기 (Post 데이터가 담겨져 있음)
 //            		 String lineData = a.readData(br, 1000);
@@ -150,14 +152,23 @@ public class RequestHandler extends Thread {
             	 response200Header(dos, body.length);
                  responseBody(dos, body);	
                  // get 방식으로 회원가입.. .
-            }
+            
             
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
     
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private int getContentLength() {
+		// TODO Auto-generated method stub
+    	
+    	
+    	
+    	
+		return 0;
+	}
+
+	private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
