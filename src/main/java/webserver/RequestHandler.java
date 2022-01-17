@@ -68,7 +68,7 @@ public class RequestHandler<RequestDispatcher> extends Thread {
             	}
             	indexNum++;
             }	
-           
+            System.out.println("URL 체크하기 !" + url);
         	byte[] body;
             DataOutputStream dos = new DataOutputStream(out);
             
@@ -77,6 +77,8 @@ public class RequestHandler<RequestDispatcher> extends Thread {
             	body = "Hello Linux Test Git World".getBytes();
             	response200Header(dos, body.length);
             	responseBody(dos, body);
+            	
+            	
             }
             
             if (url.contains("?"))  {
@@ -100,17 +102,10 @@ public class RequestHandler<RequestDispatcher> extends Thread {
             	String[] getParam = postBody.split("&");
             	User user = new User(getParam[0].split("=")[1] , getParam[1].split("=")[1] ,getParam[2].split("=")[1] , getParam[3].split("=")[1]);
             	DataBase.addUser(user);
+            	// 302 로 Redirect 시켜 줌 
             	if(user.getUserId() != null) {
-            		URLConnection con = new URL("http://localhost:8080/index.html").openConnection();
-            		URL redirectUrl = redirectURL(con.getURL());
-            	} else {
-            		
-					/*
-					 * URL setUrl = new URL("http://localhost:8080/user/login_failed.html");
-					 * URLConnection conn = setUrl.openConnection(); url =
-					 * "/user/login_failed.html";
-					 */
-            	}
+            		response302Header(dos, "http://localhost:8080/index.html");
+            	} 
             } else if(url.equals("/user/login")) {
             	String postBody = IOUtils.readData(br, Integer.parseInt(header));
             	Map<String, Object> map = new HashMap<String, Object>();
@@ -128,8 +123,8 @@ public class RequestHandler<RequestDispatcher> extends Thread {
             			url = "/index.html";
             		} else {
             			System.out.println("비밀번호가 다릅니다 !");
-            			cookie = new HttpCookie("logined", "false");
-            			url = "/user/login_failed.html";
+            			//cookie = new HttpCookie("logined", "false");
+            			//url = "/user/login_failed.html";
             		}
             	}
              }
@@ -152,11 +147,23 @@ public class RequestHandler<RequestDispatcher> extends Thread {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("Set-Cookie: logined=" + false + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
+	
+	private void response302Header(DataOutputStream dos, String location) {
+		try {
+			dos.writeBytes("HTTP/1.1 302 OK \r\n");
+			dos.writeBytes("Location:" + location);
+			dos.writeBytes("\r\n");
+		} catch(IOException e) {
+			log.error(e.getMessage());
+		}
+		
+	}
     
     private void responseBody(DataOutputStream dos, byte[] body) {
         try {
